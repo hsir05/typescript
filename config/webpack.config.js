@@ -37,6 +37,9 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 // makes for a smoother build process.
 const shouldInlineRuntimeChunk = process.env.INLINE_RUNTIME_CHUNK !== 'false';
 
+const lessRegex = /\.less$/;
+const lessModuleRegex = /\.module\.less$/;
+
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10000'
 );
@@ -450,6 +453,22 @@ module.exports = function(webpackEnv) {
               // Remove this when webpack adds a warning or an error for this.
               // See https://github.com/webpack/webpack/issues/6571
               sideEffects: true,
+            },
+            {
+                test: lessRegex,
+                exclude: lessModuleRegex,
+                use: getStyleLoaders({ importLoaders: 2 }, 'less-loader'),
+            },
+            {
+                test: lessModuleRegex,
+                use: getStyleLoaders(
+                    {
+                        importLoaders: 2,
+                        modules: true,
+                        getLocalIdent: getCSSModuleLocalIdent,
+                    },
+                    'less-loader'
+                ),
             },
             // Adds support for CSS Modules (https://github.com/css-modules/css-modules)
             // using the extension .module.css
